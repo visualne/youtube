@@ -4,9 +4,11 @@ from apiclient.discovery import build
 from apiclient.errors import HttpError
 from oauth2client.tools import argparser
 import ConfigParser
+import time
+from datetime import datetime
 
 #ToDo
-# Finish changeDate function
+# Finish changeDate function. Figure out how to create datetime object
 
 
 config = ConfigParser.ConfigParser()
@@ -21,8 +23,9 @@ YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 
 
+
 # Changes search results based on date published.
-def changeDate(date=None):
+def changeDate(options):
   # Midnight EST on 8-4-2008
   # 2008-08-04T04:00:00.000
   # Midnight EST on 8-5-2008
@@ -40,10 +43,17 @@ def changeDate(date=None):
           for second in range(60):
             # print '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+'T'+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second).zfill(2)
 
-            publishedAfter = '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+'T'+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second).zfill(2)
-            publishedBefore = '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+'T'+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second + 2).zfill(2)
+            publishedAfter = '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+' '+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second).zfill(2)
+            publishedBefore = '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+' '+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second + 2).zfill(2)
 
-            print 'Published Before: ' + publishedBefore + ' ' + 'Published After: ' + publishedAfter
+            # Converting above datetime strings to datetime objects.
+            publishedAfter = datetime.strptime(publishedAfter, "%Y-%m-%d %H:%M:%S")
+            publishedBefore = datetime.strptime(publishedBefore, "%Y-%m-%d %H:%M:%S")
+
+            # Calling youtube_search function with options, publishedAfter, publishedBefore
+            youtube_search(options, publishedAfter, publishedBefore)
+            # Sleeping for one second. This above api call with be executed...a lot
+            time.sleep(1)
 
   # Calling search with the above date
   # Need to search every hour every day for the whole day for a while year
@@ -54,9 +64,13 @@ def changeDate(date=None):
 
 
 
-def youtube_search(options):
+def youtube_search(options,publishedAfterTimestamp,publishedBeforeTimestamp):
   youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
     developerKey=DEVELOPER_KEY)
+
+  # print publishedAfterTimestamp
+  # print publishedBeforeTimestamp
+  # exit(1)
 
   # Call the search.list method to retrieve results matching the specified
   # query term.
@@ -64,8 +78,9 @@ def youtube_search(options):
     q=options.q,
     type='video',
     part="id,snippet",
-    publishedAfter='2012-08-04T00:00:00Z',
-    publishedBefore='2012-08-05T00:00:00Z',
+
+    # publishedAfter='2008-01-00T00:00:00Z',
+    # publishedBefore=publishedBeforeTimestamp,
     maxResults=options.max_results
   ).execute()
 
@@ -88,7 +103,7 @@ if __name__ == "__main__":
   args = argparser.parse_args()
 
   try:
-    changeDate()
+    changeDate(args)
     # youtube_search(args)
   except HttpError, e:
     print "An HTTP error %d occurred:\n%s" % (e.resp.status, e.content)
