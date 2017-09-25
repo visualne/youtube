@@ -31,6 +31,20 @@ def changeDate(date=None):
   publishedAfter='2016-08-04T00:00:00Z'
   publishedBefore='2016-08-04T00:00:00Z'
 
+  # Loop to create every hour in the day in GMT.
+  for month in range(1,13):
+    for day in range(32):
+      for hour in range(24):
+        # Loop to create every minute in the day in GMT.
+        for minute in range(60):
+          for second in range(60):
+            # print '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+'T'+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second).zfill(2)
+
+            publishedAfter = '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+'T'+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second).zfill(2)
+            publishedBefore = '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+'T'+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second + 2).zfill(2)
+
+            print 'Published Before: ' + publishedBefore + ' ' + 'Published After: ' + publishedAfter
+
   # Calling search with the above date
   # Need to search every hour every day for the whole day for a while year
 
@@ -74,6 +88,7 @@ if __name__ == "__main__":
   args = argparser.parse_args()
 
   try:
-    youtube_search(args)
+    changeDate()
+    # youtube_search(args)
   except HttpError, e:
     print "An HTTP error %d occurred:\n%s" % (e.resp.status, e.content)
