@@ -36,19 +36,23 @@ def changeDate(options):
 
   # Loop to create every hour in the day in GMT.
   for month in range(1,13):
-    for day in range(32):
+    for day in range(1,32):
       for hour in range(24):
         # Loop to create every minute in the day in GMT.
         for minute in range(60):
-          for second in range(60):
+          # for second in range(60):
             # print '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+'T'+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second).zfill(2)
 
-            publishedAfter = '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+' '+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second).zfill(2)
-            publishedBefore = '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+' '+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second + 2).zfill(2)
+            # publishedAfter = '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+'T'+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second).zfill(2) + 'Z'
+            # publishedBefore = '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+'T'+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':' + str(second + 2).zfill(2) + 'Z'
 
-            # Converting above datetime strings to datetime objects.
-            publishedAfter = datetime.strptime(publishedAfter, "%Y-%m-%d %H:%M:%S")
-            publishedBefore = datetime.strptime(publishedBefore, "%Y-%m-%d %H:%M:%S")
+            # Creating published after and published before timestamps, every minute. I would like to ultimately check every SECOND
+            publishedAfter = '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+'T'+str(hour).zfill(2) + ':' + str(minute).zfill(2) + ':00' + 'Z'
+            publishedBefore = '2016-'+str(month).zfill(2)+'-'+str(day).zfill(2)+'T'+str(hour).zfill(2) + ':' + str(minute + 30).zfill(2) + ':00' + 'Z'
+
+
+            print 'publishedAfter: ' + publishedAfter
+            print 'publishedBefore: ' + publishedBefore
 
             # Calling youtube_search function with options, publishedAfter, publishedBefore
             youtube_search(options, publishedAfter, publishedBefore)
@@ -64,7 +68,7 @@ def changeDate(options):
 
 
 
-def youtube_search(options,publishedAfterTimestamp,publishedBeforeTimestamp):
+def youtube_search(options,publishedAfterTimestamp=None,publishedBeforeTimestamp=None):
   youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
     developerKey=DEVELOPER_KEY)
 
@@ -78,9 +82,8 @@ def youtube_search(options,publishedAfterTimestamp,publishedBeforeTimestamp):
     q=options.q,
     type='video',
     part="id,snippet",
-
-    # publishedAfter='2008-01-00T00:00:00Z',
-    # publishedBefore=publishedBeforeTimestamp,
+    publishedAfter=publishedAfterTimestamp,
+    publishedBefore=publishedBeforeTimestamp,
     maxResults=options.max_results
   ).execute()
 
